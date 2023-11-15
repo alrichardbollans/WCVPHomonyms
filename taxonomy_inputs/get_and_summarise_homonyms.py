@@ -1,7 +1,8 @@
 import os
 
 import pandas as pd
-from wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names
+from wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names, hybrid_characters
+from wcvp_name_matching import get_genus_from_full_name
 
 scratch_path = os.environ.get('SCRATCH')
 project_path = os.path.join(scratch_path, 'WCVPHomonyms')
@@ -54,26 +55,32 @@ def get_ambiguous_homonym_files():
     summarise_homonym_df(duplicates, outpath)
 
 
-def add_authors_to_names(df: pd.DataFrame):
-    # TODO: Add abrreviated genus
-    # df['abbreviated_genus'] = df[wcvp_columns['name']].apply(lambda x: x[0] + '.')
-    # df['sp_binomial_with_abbreviated_genus'] = df[wcvp_columns['abbreviated_genus']].str.cat(
-    #     df['species'].fillna(''),
-    #     sep=' ').apply(clean_whitespaces_in_names)
-
-    df['taxon_names_with_authors'] = df[wcvp_columns['name']].str.cat(
+def add_authors_to_given_col(df: pd.DataFrame, col, name_tag: str):
+    df[name_tag + '_with_authors'] = df[col].str.cat(
         df[wcvp_columns['authors']].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
 
     column_series = [df[c].fillna('') for c in
                      [wcvp_columns['paranthet_author'], wcvp_columns['primary_author']]]
-    df['taxon_names_with_paranthet_authors'] = df[wcvp_columns['name']].str.cat(column_series,
-                                                                                sep=' ').apply(
+    df[name_tag + '_with_paranthet_authors'] = df[col].str.cat(column_series,
+                                                               sep=' ').apply(
         clean_whitespaces_in_names)
 
-    df['taxon_names_with_primary_author'] = df[wcvp_columns['name']].str.cat(
+    df[name_tag + '_with_primary_author'] = df[col].str.cat(
         df[wcvp_columns['primary_author']].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
+
+
+
+def add_authors_to_names(df: pd.DataFrame):
+    add_authors_to_given_col(df, wcvp_columns['name'], 'taxon_names')
+
+    df['abbreviated_genus'] = df[wcvp_columns['genus']].apply(lambda x: x[0] + '.')
+    df['sp_binomial_with_abbreviated_genus'] = df['abbreviated_genus'].str.cat(
+        df['species'].fillna(''),
+        sep=' ').apply(clean_whitespaces_in_names)
+
+    add_authors_to_given_col(df, 'sp_binomial_with_abbreviated_genus', 'sp_binomial_with_abbreviated_genus')
 
 
 def main():

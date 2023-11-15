@@ -58,6 +58,10 @@ def _get_filter_dict():
         out_list += relevant_taxa['taxon_names_with_paranthet_authors'].unique().tolist()
         out_list += relevant_taxa['taxon_names_with_primary_author'].unique().tolist()
 
+        out_list += relevant_taxa['sp_binomial_with_abbreviated_genus_with_authors'].unique().tolist()
+        out_list += relevant_taxa['sp_binomial_with_abbreviated_genus_with_paranthet_authors'].unique().tolist()
+        out_list += relevant_taxa['sp_binomial_with_abbreviated_genus_with_primary_author'].unique().tolist()
+
         unique_out_list = list(set(out_list))
         cleaned = [clean_string(v) for v in unique_out_list]
 
