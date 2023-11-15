@@ -1,11 +1,10 @@
 import os
 import pickle
 import string
-from collections import Counter
+from typing import List
 
 import pandas as pd
 from tqdm import tqdm
-from typing import List
 from wcvp_download import infraspecific_chars, hybrid_characters, wcvp_columns
 
 from taxonomy_inputs import taxonomy_inputs_output_path, project_path
@@ -34,7 +33,17 @@ def clean_string(given_string) -> str:
         return given_string
 
 
-def get_filter_dict():
+def build_output_dict(corpusid: str, doi: str, year: str, title: str, authors: List[str],
+                      url: str, language: str, journals: str, issn: str, homonym_uses: List[str], ambiguous_uses: List[str],
+                      disambiguators: dict):
+    out_dict = {'corpusid': [corpusid], 'DOI': [doi], 'year': year, 'language': language, 'journals': journals, 'issn': issn,
+                'title': [title], 'authors': [str(authors)], 'oaurl': [url], 'homonym_uses': [str(homonym_uses)],
+                'ambiguous_uses': [str(ambiguous_uses)], 'disambiguators': [str(disambiguators)]}
+
+    return out_dict
+
+
+def _get_filter_dict():
     name_terms_dict = {}
     for i in tqdm(range(len(names_to_search))):
         taxon_name = names_to_search[i]
@@ -52,43 +61,12 @@ def get_filter_dict():
         unique_out_list = list(set(out_list))
         cleaned = [clean_string(v) for v in unique_out_list]
 
-        name_terms_dict[taxon_name] = cleaned
+        name_terms_dict[clean_string(taxon_name)] = cleaned
     with open(filter_dict_pkl, 'wb') as f:
         pickle.dump(name_terms_dict, f)
 
 
-def find_ambiguous_uses(given_text: str) -> List[str]:
-    clean_text = clean_string(given_text)
-    with open(filter_dict_pkl, 'rb') as f:
-        loaded_filter_dict = pickle.load(f)
-
-        ambiguous_uses = []
-        # start_time = time.time()
-        words = clean_text.split()
-        paired_words = [" ".join([words[i], words[i + 1]]) for i in range(len(words) - 1)]
-        trio_words = [" ".join([words[i], words[i + 1], words[i + 2]]) for i in range(len(words) - 2)]
-        quad_words = [" ".join([words[i], words[i + 1], words[i + 2], words[i + 3]]) for i in range(len(words) - 3)]
-        cin_words = [" ".join([words[i], words[i + 1], words[i + 2], words[i + 3], words[i + 4]]) for i in range(len(words) - 4)]
-        potential_words = words + paired_words + trio_words + quad_words + cin_words
-
-        # First find potentially ambiguous words
-        res = Counter(potential_words)
-        intersection = set(res.keys()).intersection(loaded_filter_dict.keys())
-        if len(intersection) > 0:
-            pass
-
-        return ambiguous_uses
-
-
-def build_output_dict(corpusid: str, doi: str, year: str, ambiguous_uses: List[str], title: str, authors: List[str],
-                      url: str, language: str, journals: str, issn: str):
-    out_dict = {'corpusid': [corpusid], 'DOI': [doi], 'year': year, 'language': language, 'journals': journals, 'issn': issn,
-                'title': [title], 'authors': [str(authors)], 'oaurl': [url], 'ambiguous_uses': [str(ambiguous_uses)]}
-
-    return out_dict
-
-
-def find_longest_search_terms():
+def _find_longest_search_terms():
     with open(filter_dict_pkl, 'rb') as f:
         loaded_filter_dict = pickle.load(f)
         longest = 0
@@ -106,10 +84,10 @@ def find_longest_search_terms():
                     biggest = item
         print(f'Longest disambiguator: {longest} words: {biggest}')
         print(f'Longest ambiguous term: {longest_ambiguous} words: {biggest_ambiguous}')
-    if longest_ambiguous > 5:
+    if longest_ambiguous > 3:
         raise ValueError('Need to fix searching for more than 5 words')
 
 
 if __name__ == '__main__':
-    get_filter_dict()
-    find_longest_search_terms()
+    _get_filter_dict()
+    _find_longest_search_terms()

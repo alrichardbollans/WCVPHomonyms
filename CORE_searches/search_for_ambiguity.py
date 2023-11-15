@@ -2,12 +2,14 @@ import _lzma
 import json
 import multiprocessing
 import os
+import pickle
 import tarfile
 import time
 
 import pandas as pd
+from typing import Tuple, List
 
-from CORE_searches import find_ambiguous_uses, build_output_dict, core_project_path
+from CORE_searches import build_output_dict, core_project_path, filter_dict_pkl, clean_string
 
 scratch_path = os.environ.get('SCRATCH')
 
@@ -15,6 +17,51 @@ core_MPM_project_path = os.path.join(scratch_path, 'MedicinalPlantMining', 'lite
 CORE_TAR_FILE = os.path.join(core_MPM_project_path, 'core_2022-03-11_dataset.tar.xz')
 
 core_paper_info_path = os.path.join(core_project_path, 'downloads', 'paper_info')
+for p in [core_paper_info_path]:
+    if not os.path.exists(p):
+        os.mkdir(p)
+
+
+def find_ambiguous_uses(given_text: str) -> Tuple[List[str], List[str], dict]:
+    start_time = time.time()
+    clean_text = clean_string(given_text)
+
+    words = clean_text.split()
+    paired_words = [" ".join([words[i], words[i + 1]]) for i in range(len(words) - 1)]
+    trio_words = [" ".join([words[i], words[i + 1], words[i + 2]]) for i in range(len(words) - 2)]
+    # quad_words = [" ".join([words[i], words[i + 1], words[i + 2], words[i + 3]]) for i in range(len(words) - 3)]
+    # cin_words = [" ".join([words[i], words[i + 1], words[i + 2], words[i + 3], words[i + 4]]) for i in range(len(words) - 4)]
+    potential_words = words + paired_words + trio_words# + quad_words + cin_words
+
+    # First find potentially ambiguous words
+    # res = Counter(potential_words)
+
+    intersection = set(potential_words).intersection(homonyms)
+    if len(intersection) > 0:
+        homonym_uses = list(intersection)
+        ambiguous_uses = []
+        disambiguators = {}
+
+        for homonym in homonym_uses:
+            disambiguators[homonym] = []
+            for disambiguating_text in loaded_filter_dict[homonym]:
+                if disambiguating_text in clean_text:
+                    disambiguators[homonym].append(disambiguating_text)
+            if len(disambiguators[homonym]) == 0:
+                ambiguous_uses.append(homonym)
+                del disambiguators[homonym]
+
+        if len(ambiguous_uses) == 0:
+            assert len(list(disambiguators.keys())) > 0
+        if len(ambiguous_uses) == len(homonym_uses):
+            assert len(list(disambiguators.keys())) == 0
+
+        # end_time = time.time()
+        # print(
+        #     f'Took {round((end_time - start_time), 4)} seconds to gather text.')
+        return homonym_uses, ambiguous_uses, disambiguators
+    else:
+        return [], [], {}
 
 
 def clean_title_strings(given_title: str) -> str:
@@ -77,14 +124,14 @@ def process_tar_member(provider):
                         text = paper['fullText']
 
                         if text is not None:
-                            ambiguous_uses = find_ambiguous_uses(text)
-                            if len(ambiguous_uses) > 0:
+                            homonym_uses, ambiguous_uses, disambiguators = find_ambiguous_uses(text)
+                            if len(homonym_uses) > 0:
                                 corpusid, language, journals, subjects, topics, year, issn, doi, title, authors, url, oai = get_info_from_core_paper(
                                     paper)
 
                                 info_df = pd.DataFrame(
-                                    build_output_dict(corpusid, doi, year, ambiguous_uses, title, authors,
-                                                      url, language, journals, issn))
+                                    build_output_dict(corpusid, doi, year, title, authors,
+                                                      url, language, journals, issn, homonym_uses, ambiguous_uses, disambiguators))
 
                                 provider_df = pd.concat([provider_df, info_df])
                     elif m.name.endswith('.xml'):
@@ -100,6 +147,10 @@ def process_tar_member(provider):
         provider_df['tar_archive_name'] = tar_archive_name
         provider_df.set_index(['corpusid'], drop=True).to_csv(os.path.join(core_paper_info_path, tar_archive_name + '.csv'))
     end_time = time.time()
+    if total_paper_count == 0:
+        if m.name.endswith('.xml'):
+            f = sub_archive.extractfile(m)
+            lines = f.readlines()
     print(
         f'{len(provider_df)} out of {total_paper_count} papers collected from provider: {tar_archive_name}. Took {round((end_time - start_time) / 60, 2)} mins.')
     return provider_df
@@ -114,7 +165,7 @@ def get_relevant_papers_from_download():
         # iterate over members then get all members out of these
         # Each member is a Data provider, see here: https://core.ac.uk/data-providers
         print('unzipped main archive')
-        with multiprocessing.Pool(64) as pool:
+        with multiprocessing.Pool(7) as pool:
             tasks = [pool.apply_async(process_tar_member, args=(member,)) for member in main_archive]
             # Wait for all tasks to complete
             for task in tasks:
@@ -122,4 +173,7 @@ def get_relevant_papers_from_download():
 
 
 if __name__ == '__main__':
-    get_relevant_papers_from_download()
+    with open(filter_dict_pkl, 'rb') as f:
+        loaded_filter_dict = pickle.load(f)
+        homonyms = set(loaded_filter_dict.keys())
+        get_relevant_papers_from_download()
