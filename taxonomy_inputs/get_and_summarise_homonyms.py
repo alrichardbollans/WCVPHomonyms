@@ -44,10 +44,10 @@ def get_homonym_files():
 
 
 def get_ambiguous_homonym_files():
-    # Gets homonymns that can resolve to different names
+    # Gets homonymns that can resolve to different *species*
     outpath = os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms')
     # groupby name and return a boolean of whether each has more than 1 unique accepted name
-    multinames = wcvp_given_data.groupby([wcvp_columns['name']])[wcvp_accepted_columns['name']].nunique().gt(
+    multinames = wcvp_given_data.groupby([wcvp_columns['name']])[wcvp_accepted_columns['species']].nunique().gt(
         1)
     # use loc to only see those values that have `True` in `accepted_name`:
     duplicates = wcvp_given_data.loc[wcvp_given_data[wcvp_columns['name']].isin(multinames[multinames].index)]
@@ -55,6 +55,12 @@ def get_ambiguous_homonym_files():
 
 
 def add_authors_to_names(df: pd.DataFrame):
+    # TODO: Add abrreviated genus
+    # df['abbreviated_genus'] = df[wcvp_columns['name']].apply(lambda x: x[0] + '.')
+    # df['sp_binomial_with_abbreviated_genus'] = df[wcvp_columns['abbreviated_genus']].str.cat(
+    #     df['species'].fillna(''),
+    #     sep=' ').apply(clean_whitespaces_in_names)
+
     df['taxon_names_with_authors'] = df[wcvp_columns['name']].str.cat(
         df[wcvp_columns['authors']].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
@@ -77,5 +83,5 @@ def main():
 
 if __name__ == '__main__':
     wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
-    wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))] # restrict to just homonyms being species
+    wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
     main()
