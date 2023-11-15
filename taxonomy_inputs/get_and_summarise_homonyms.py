@@ -77,4 +77,5 @@ def main():
 
 if __name__ == '__main__':
     wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
+    wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))] # restrict to just homonyms being species
     main()
