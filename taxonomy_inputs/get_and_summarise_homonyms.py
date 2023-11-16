@@ -123,6 +123,6 @@ if __name__ == '__main__':
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
 
     wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
-    wcvp_given_data[['taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
+    wcvp_given_data[['plant_name_id','taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
                      'publication_author', 'first_published', 'publication_year']].to_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'))
     main()
