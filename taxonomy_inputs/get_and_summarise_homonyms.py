@@ -1,8 +1,9 @@
 import os
 
+import numpy as np
 import pandas as pd
-from wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names, hybrid_characters
-from wcvp_name_matching import get_genus_from_full_name
+from wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names
+from datetime import datetime
 
 scratch_path = os.environ.get('SCRATCH')
 project_path = os.path.join(scratch_path, 'WCVPHomonyms')
@@ -19,7 +20,6 @@ def summarise_homonym_df(df: pd.DataFrame, outpath: str):
                  'accepted_parent_rank'
                  ])
     duplicates = duplicates.sort_values(by=wcvp_columns['name'])
-
     add_authors_to_names(duplicates)
 
     duplicates.to_csv(os.path.join(outpath, 'homonyms.csv'))
@@ -71,7 +71,6 @@ def add_authors_to_given_col(df: pd.DataFrame, col, name_tag: str):
         sep=' ').apply(clean_whitespaces_in_names)
 
 
-
 def add_authors_to_names(df: pd.DataFrame):
     add_authors_to_given_col(df, wcvp_columns['name'], 'taxon_names')
 
@@ -83,6 +82,37 @@ def add_authors_to_names(df: pd.DataFrame):
     add_authors_to_given_col(df, 'sp_binomial_with_abbreviated_genus', 'sp_binomial_with_abbreviated_genus')
 
 
+def parse_publication_year(given_string: str):
+    if given_string == '(1981 publ. 1082)':  # An exception that returns a valid date
+        return '1982'
+    elif given_string in ['(19166)',
+                        '(19543)',
+                        '(19553)',
+                        '(19667)',
+                        '(19983)',
+                        ]: # Some obivous errors that return valid dates
+        return np.nan
+
+    try:
+        out = given_string[-5:-1]
+    except TypeError:
+        out = given_string
+    finally:
+        return test_year_parsing(out)
+
+
+def test_year_parsing(given_str):
+    format = "%Y"
+    if given_str == '' or given_str is None or given_str != given_str:
+        return np.nan
+    else:
+        try:
+            datetime.strptime(given_str, format)
+            return given_str
+        except ValueError:
+            return np.nan
+
+
 def main():
     get_homonym_files()
     get_ambiguous_homonym_files()
@@ -91,4 +121,8 @@ def main():
 if __name__ == '__main__':
     wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
+
+    wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
+    wcvp_given_data[['taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
+                     'publication_author', 'first_published', 'publication_year']].to_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'))
     main()
