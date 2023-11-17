@@ -1,1 +1,1 @@
-from .get_and_summarise_homonyms import *
+from .get_homonyms import *
