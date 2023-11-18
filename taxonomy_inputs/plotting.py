@@ -103,8 +103,10 @@ def year_plots():
 
 
 def family_plots():
+    # TODO: maybe change to accepted family?
     generic_category_plot('family', 'WCVP Species Homonyms in Families', figsize=(60, 10), sort_var=True)
 
 
 if __name__ == '__main__':
+    year_plots()
     family_plots()

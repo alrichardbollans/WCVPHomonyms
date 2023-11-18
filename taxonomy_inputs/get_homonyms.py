@@ -48,7 +48,7 @@ def get_ambiguous_homonym_files():
     # Gets homonymns that can resolve to different *species*
     outpath = os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms')
     # groupby name and return a boolean of whether each has more than 1 unique accepted name
-    multinames = wcvp_given_data.groupby([wcvp_columns['name']])[wcvp_accepted_columns['species']].nunique().gt(
+    multinames = wcvp_given_data.groupby([wcvp_columns['name']])[wcvp_accepted_columns['species']].nunique(dropna=True).gt(
         1)
     # use loc to only see those values that have `True` in `accepted_name`:
     duplicates = wcvp_given_data.loc[wcvp_given_data[wcvp_columns['name']].isin(multinames[multinames].index)]
@@ -121,7 +121,7 @@ def main():
 if __name__ == '__main__':
     wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
-
+    wcvp_given_data = wcvp_given_data.dropna(subset=[wcvp_accepted_columns['species']])
     wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
     wcvp_given_data[['plant_name_id', 'taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
                      'publication_author', 'first_published', 'publication_year', 'family']].to_csv(
