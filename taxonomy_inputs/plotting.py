@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 from matplotlib import pyplot as plt
+from wcvp_download import wcvp_columns
 
 from taxonomy_inputs import taxonomy_inputs_output_path
 
@@ -106,7 +107,41 @@ def family_plots():
     # TODO: maybe change to accepted family?
     generic_category_plot('family', 'WCVP Species Homonyms in Families', figsize=(60, 10), sort_var=True)
 
+def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col=wcvp_columns['status'], piefigsize=(4, 2.5)):
+    from matplotlib import pyplot as plt
+
+    # count the occurrences of each classification
+    counts = df[class_col].value_counts()
+
+    # create a pie chart of the counts
+    def my_autopct(pct):
+        return ('%1.0f%%' % pct) if pct > 3 else ''
+
+    plt.figure(figsize=piefigsize)
+    plt.pie(counts, labels=counts.index, radius=1.1,
+            autopct=my_autopct,  # ,
+            textprops={'fontsize': 12, 'color': 'white'})
+
+    plt.legend(title="Status", bbox_to_anchor=(1, 0.5), loc="center right", fontsize=10,
+               bbox_transform=plt.gcf().transFigure)
+    plt.subplots_adjust(left=0.0, bottom=0.1, right=0.45)
+
+    plt.savefig(os.path.join(outpath, file_tag + '_pie_chart.png'), dpi=300)
+    plt.close()
+
+    # create a bar plot of the counts
+    plt.figure(figsize=(10, 6))
+    plt.bar(counts.index, counts.values)
+    plt.xticks(rotation=45, ha='right')
+    plt.xlabel('Status', fontsize=14)
+    plt.ylabel('Occurrences', fontsize=14)
+    plt.tight_layout()
+    plt.savefig(os.path.join(outpath, file_tag + '_bar_chart.png'), dpi=300, bbox_inches='tight', pad_inches=0.1)
+    plt.close()
 
 if __name__ == '__main__':
     year_plots()
     family_plots()
+    ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
+                                     dtype={'publication_year': 'Int64'})
+    plot_taxon_statuses(ambiguous_homonyms, os.path.join('outputs', 'plots'),'ambiguous_homonyms_taxon_status')
