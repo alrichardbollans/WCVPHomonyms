@@ -9,20 +9,16 @@ from taxonomy_inputs import taxonomy_inputs_output_path
 
 def generic_category_plot(var: str, title: str, figsize=(40, 10), sort_var=False):
     import seaborn as sns
-    given_wcvp_data = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'), index_col=0, dtype={'publication_year': 'Int64'})
-    all_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'all_homonyms', 'homonyms.csv'), dtype={'publication_year': 'Int64'})
-    ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
-                                     dtype={'publication_year': 'Int64'})
 
-    given_wcvp_data = given_wcvp_data.dropna(subset=[var])
-    all_homonyms = all_homonyms.dropna(subset=[var])
-    ambiguous_homonyms = ambiguous_homonyms.dropna(subset=[var])
+    _given_wcvp_data = given_wcvp_data.dropna(subset=[var])
+    _all_homonyms = all_homonyms.dropna(subset=[var])
+    _ambiguous_homonyms = ambiguous_homonyms.dropna(subset=[var])
 
-    given_wcvp_data['Legend'] = 'Non Homonymous Species Names'
-    all_homonyms['Legend'] = 'Non-ambiguous Homonymous Species Names'
-    ambiguous_homonyms['Legend'] = 'Ambiguous Homonymous Species Names'
+    _given_wcvp_data['Legend'] = 'Non Homonymous Species Names'
+    _all_homonyms['Legend'] = 'Non-ambiguous Homonymous Species Names'
+    _ambiguous_homonyms['Legend'] = 'Ambiguous Homonymous Species Names'
 
-    all_data = pd.concat([given_wcvp_data, all_homonyms, ambiguous_homonyms])
+    all_data = pd.concat([_given_wcvp_data, _all_homonyms, _ambiguous_homonyms])
     all_data = all_data.drop_duplicates(subset=['plant_name_id'], keep='last')  # Remove duplicates and keep most specific
 
     if sort_var:
@@ -67,35 +63,31 @@ def generic_category_plot(var: str, title: str, figsize=(40, 10), sort_var=False
 def year_plots():
     generic_category_plot('publication_year', 'WCVP Species Publications and Homonym Occurrence')
     import seaborn as sns
-    given_wcvp_data = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'), index_col=0, dtype={'publication_year': 'Int64'})
-    all_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'all_homonyms', 'homonyms.csv'), dtype={'publication_year': 'Int64'})
-    ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
-                                     dtype={'publication_year': 'Int64'})
 
-    given_wcvp_data = given_wcvp_data.dropna(subset=['publication_year'])
-    all_homonyms = all_homonyms.dropna(subset=['publication_year'])
-    ambiguous_homonyms = ambiguous_homonyms.dropna(subset=['publication_year'])
+    _given_wcvp_data = given_wcvp_data.dropna(subset=['publication_year'])
+    _all_homonyms = all_homonyms.dropna(subset=['publication_year'])
+    _ambiguous_homonyms = ambiguous_homonyms.dropna(subset=['publication_year'])
 
-    given_wcvp_data['Legend'] = 'Non Homonymous Species Names'
-    all_homonyms['Legend'] = 'Non-ambiguous Homonymous Species Names'
-    ambiguous_homonyms['Legend'] = 'Ambiguous Homonymous Species Names'
+    _given_wcvp_data['Legend'] = 'Non Homonymous Species Names'
+    _all_homonyms['Legend'] = 'Non-ambiguous Homonymous Species Names'
+    _ambiguous_homonyms['Legend'] = 'Ambiguous Homonymous Species Names'
 
     plt.figure(figsize=(40, 10))
-    sns.countplot(x='publication_year', data=given_wcvp_data, )
+    sns.countplot(x='publication_year', data=_given_wcvp_data, )
     plt.xticks(rotation=90)
     plt.title('WCVP Species Publications')
     plt.tight_layout()
     plt.savefig(os.path.join('outputs', 'plots', 'WCVP Species Publications.jpg'), dpi=300)
 
     plt.figure(figsize=(40, 10))
-    sns.countplot(x='publication_year', data=all_homonyms, )
+    sns.countplot(x='publication_year', data=_all_homonyms, )
     plt.xticks(rotation=90)
     plt.title('WCVP Homonymous Species Publications')
     plt.tight_layout()
     plt.savefig(os.path.join('outputs', 'plots', 'WCVP Homonymous Species Publications.jpg'), dpi=300)
 
     plt.figure(figsize=(40, 10))
-    sns.countplot(x='publication_year', data=ambiguous_homonyms, )
+    sns.countplot(x='publication_year', data=_ambiguous_homonyms, )
     plt.xticks(rotation=90)
     plt.title('WCVP Ambiguous Homonymous Species Publications')
     plt.tight_layout()
@@ -148,9 +140,11 @@ def plot_distributions():
 
 
 if __name__ == '__main__':
-    year_plots()
-    family_plots()
+    given_wcvp_data = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'), index_col=0, dtype={'publication_year': 'Int64'})
+    all_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'all_homonyms', 'homonyms.csv'), dtype={'publication_year': 'Int64'})
     ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
                                      dtype={'publication_year': 'Int64'})
+    year_plots()
+    family_plots()
     plot_taxon_statuses(ambiguous_homonyms, os.path.join('outputs', 'plots'), 'ambiguous_homonyms_taxon_status')
     plot_distributions()
