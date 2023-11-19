@@ -103,8 +103,7 @@ def year_plots():
 
 
 def family_plots():
-    # TODO: maybe change to accepted family?
-    generic_category_plot('family', 'WCVP Species Homonyms in Families', figsize=(60, 10), sort_var=True)
+    generic_category_plot(wcvp_accepted_columns['family'], 'WCVP Species Homonyms in Families', figsize=(60, 10), sort_var=True)
 
 
 def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col=wcvp_columns['status'], piefigsize=(4, 2.5)):
@@ -139,12 +138,15 @@ def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col
     plt.savefig(os.path.join(outpath, file_tag + '_bar_chart.png'), dpi=300, bbox_inches='tight', pad_inches=0.1)
     plt.close()
 
+
 def plot_distributions():
     ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
                                      dtype={'publication_year': 'Int64'})
     ambiguous_homonyms = ambiguous_homonyms[ambiguous_homonyms[wcvp_columns['status']] == 'Accepted']
     plot_native_number_accepted_taxa_in_regions(ambiguous_homonyms, wcvp_accepted_columns['species'], os.path.join('outputs', 'plots'),
                                                 'ambiguous_homonyms_dists.jpg', include_extinct=True)
+
+
 if __name__ == '__main__':
     year_plots()
     family_plots()
