@@ -125,7 +125,7 @@ if __name__ == '__main__':
     wcvp_given_data = wcvp_given_data.dropna(subset=[wcvp_accepted_columns['species']])
     wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
     wcvp_given_data[['plant_name_id', 'taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
-                     'publication_author', 'first_published', 'publication_year', wcvp_accepted_columns['family']]].to_csv(
+                     'publication_author', 'first_published', 'publication_year', wcvp_accepted_columns['family'], wcvp_columns['status']]].to_csv(
         os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'))
     wcvp_given_data.describe(include='all').to_csv(os.path.join(taxonomy_inputs_output_path, 'summaries', 'wcvp_data_summary.csv'))
     main()
