@@ -22,7 +22,16 @@ def proportion_of_homonyms_in_wcvp():
 
 
 def proportion_of_homonyms_which_are_also_accepted():
-    pass
+    ambiguous_homonymous_names = ambiguous_homonyms['taxon_name'].unique().tolist()
+
+    ambiguous_homonyms_that_are_also_accepted = given_wcvp_data[given_wcvp_data[wcvp_columns['status']] == 'Accepted']
+    ambiguous_homonyms_that_are_also_accepted = ambiguous_homonyms_that_are_also_accepted[
+        ambiguous_homonyms_that_are_also_accepted['taxon_name'].isin(ambiguous_homonymous_names)]['taxon_name'].unique().tolist()
+
+    pd.DataFrame([[len(ambiguous_homonyms_that_are_also_accepted), len(ambiguous_homonymous_names)]],
+                 columns=['ambiguous_homonyms_that_are_also_accepted', 'ambiguous_homonymous_names'],
+                 index=['counts']).to_csv(
+        os.path.join(summary_path, 'proportion_of_homonyms_which_are_also_accepted.csv'))
 
 
 def number_of_homonyms_resolving_to_different_genus():
@@ -40,8 +49,8 @@ def get_most_common_names():
 
     homonym_that_refers_to_most_different_species = ambiguous_homonyms.groupby([wcvp_columns['name']])[wcvp_accepted_columns['species']].nunique(
         dropna=True).sort_values(ascending=False).index[0]
-    worst_homonym_df = all_homonyms[all_homonyms['taxon_name']==homonym_that_refers_to_most_different_species]
-    worst_homonym_df.to_csv(os.path.join(summary_path, 'homonym_that_refers_to_most_different_species.csv'))
+    worst_homonym_df = all_homonyms[all_homonyms['taxon_name'] == homonym_that_refers_to_most_different_species]
+    worst_homonym_df.sort_values(by='accepted_name').to_csv(os.path.join(summary_path, 'homonym_that_refers_to_most_different_species.csv'))
 
 
 if __name__ == '__main__':
@@ -50,4 +59,5 @@ if __name__ == '__main__':
     ambiguous_homonyms = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'ambiguous_homonyms', 'homonyms.csv'),
                                      dtype={'publication_year': 'Int64'})
     proportion_of_homonyms_in_wcvp()
+    proportion_of_homonyms_which_are_also_accepted()
     get_most_common_names()

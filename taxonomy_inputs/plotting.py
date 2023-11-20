@@ -132,13 +132,9 @@ def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col
 
 
 def plot_distributions():
-    _ambiguous_homonyms = ambiguous_homonyms[ambiguous_homonyms[wcvp_columns['status']] == 'Accepted']
-    plot_native_number_accepted_taxa_in_regions(_ambiguous_homonyms, wcvp_accepted_columns['species'], os.path.join('outputs', 'plots'),
+
+    plot_native_number_accepted_taxa_in_regions(ambiguous_homonyms, wcvp_accepted_columns['species'], os.path.join('outputs', 'plots'),
                                                 'ambiguous_homonyms_dists.jpg', include_extinct=True)
-    _given_wcvp_data = given_wcvp_data[given_wcvp_data[wcvp_columns['status']] == 'Accepted']
-    _given_wcvp_data = _given_wcvp_data[_given_wcvp_data['taxon_rank'] == 'Species']
-    plot_native_number_accepted_taxa_in_regions(_given_wcvp_data, 'taxon_name', os.path.join('outputs', 'plots'),
-                                                'all_species_dists.jpg', include_extinct=True)
 
 
 if __name__ == '__main__':

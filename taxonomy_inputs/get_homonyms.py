@@ -120,7 +120,7 @@ def main():
 
 if __name__ == '__main__':
     wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
-    wcvp_given_data = wcvp_given_data[wcvp_given_data['taxon_status'] != 'Unplaced']
+    wcvp_given_data = wcvp_given_data[~wcvp_given_data[wcvp_columns['status']].isin(['Artificial Hybrid', 'Unplaced'])]
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
     wcvp_given_data = wcvp_given_data.dropna(subset=[wcvp_accepted_columns['species']])
     wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
