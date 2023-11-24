@@ -3,9 +3,7 @@
 ## What do we count as a homonym?
 
 This analysis considers validly published binomial species names (excluding hybrids) in the World Checklist of Vascular Plants (WCVP) that resolve to
-an accepted name (
-i.e. Unplaced names
-are ignored). We consider duplicated binomial names (homonyms) and specifically ambiguous homonyms (i.e. those that resolve to different accepted
+an accepted name (i.e. Unplaced names are ignored). We consider duplicated binomial names as homonyms, and specifically explore ambiguous homonyms (i.e. those that resolve to different accepted
 species).
 
 ## Overview
@@ -28,7 +26,6 @@ the binomial name that can refer to the most different accepted species, possibl
 - *Artemisia rupestris* L.
 - *Artemisia splendens* Willd.
 - *Artemisia umbelliformis subsp. umbelliformis*
-
 
 ## Where and When do Ambiguous Homonyms Come From?
 
