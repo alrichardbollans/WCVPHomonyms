@@ -1,8 +1,8 @@
 WCVP (V12). World Checklist of Vascular Plants. Facilitated by the Royal Botanic Gardens, Kew. Published
 on the Internet
 http://wcvp.science.kew.org/
-Retrieved 04/10/2023
+Retrieved 12/12/2023
 
-automatchnames v1.2.6
+automatchnames v1.3
 Python packages for downloading the World Checklist of Vascular Plants (WCVP) and matching names to it
 https://github.com/alrichardbollans/automatchnames
