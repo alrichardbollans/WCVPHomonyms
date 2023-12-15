@@ -1,8 +1,8 @@
 import os
 import pickle
+import re
 import string
 from typing import List
-import re
 
 import pandas as pd
 from tqdm import tqdm
@@ -21,21 +21,35 @@ filter_dict_pkl = os.path.join(core_project_path, 'temp_outputs', 'saved_diction
 longest_ambiguous_homonym = 3
 longest_potential_disambiguator = 10
 
+# Compile regexes once first
+# Split by looking for an instance of simple_string (ignoring case) begins a line on its own (or with line numbers) followed by any amount of whitespace and then a new line
+# Must use re.MULTILINE flag such that the pattern character '^' matches at the beginning of the string and at the beginning of each line (immediately following each newline)
+_reference_regex = re.compile(r"^\s*\d*\s*References\s*\n", flags=re.IGNORECASE | re.MULTILINE)
+_supp_regex = re.compile(r"^\s*\d*\s*Supplementary material\s*\n", flags=re.IGNORECASE | re.MULTILINE)
+_conf_regex = re.compile(r"^\s*\d*\s*Conflict of interest\s*\n", flags=re.IGNORECASE | re.MULTILINE)
+_ackno_regex = re.compile(r"^\s*\d*\s*Acknowledgments\s*\n", flags=re.IGNORECASE | re.MULTILINE)
+_punctuation_to_strip = string.punctuation
+for h in hybrid_characters:
+    _punctuation_to_strip = _punctuation_to_strip.replace(h, '')
 
-def retrieve_text_before_simple_phrase(given_text: str, simple_string: str) -> str:
-    my_regex = r"(?:(?:^\s*\d*\s*" + re.escape(simple_string) + r"\n)|(?:^\s*" + re.escape(simple_string) + r"\s*\n))"
-    # Split by looking for an instance of simple_string (ignoring case) begins a line on its own (or with line numbers) followed by any amount of whitespace and then a new line
-    # Must use re.MULTILINE flag such that the pattern character '^' matches at the beginning of the string and at the beginning of each line (immediately following each newline)
-    text_split = re.split(my_regex, given_text, maxsplit=1, flags=re.IGNORECASE | re.MULTILINE)
-    pre_split = text_split[0]
-    if len(text_split) > 1:
-        post_split = text_split[
-            1]  # If maxsplit is nonzero, at most maxsplit splits occur, and the remainder of the string is returned as the final element of the list
-        # if text after split point is longer than before, then revert.
-        if len(post_split) > len(pre_split):
-            pre_split = given_text
 
-    return pre_split
+def retrieve_text_before_phrase(given_text: str, my_regex, simple_string: str, simple_string_lower: str) -> str:
+    if simple_string in given_text or simple_string_lower in given_text:
+
+        text_split = my_regex.split(given_text, maxsplit=1)  # This is the bottleneck
+
+        pre_split = text_split[0]
+        if len(text_split) > 1:
+            post_split = text_split[
+                1]  # If maxsplit is nonzero, at most maxsplit splits occur, and the remainder of the string is returned as the final element of the list
+            # if text after split point is longer than before, then revert.
+            if len(post_split) > len(pre_split):
+                pre_split = given_text
+
+        return pre_split
+    else:
+
+        return given_text
 
 
 def clean_paper_text(text: str) -> str:
@@ -44,10 +58,10 @@ def clean_paper_text(text: str) -> str:
 
     # Split by looking for an instance of 'Supplementary material' (ignoring case)
     # begins a line on its own (followed by any amount of whitespace and then a new line)
-    pre_reference = retrieve_text_before_simple_phrase(text, 'References')
-    pre_supplementary = retrieve_text_before_simple_phrase(pre_reference, 'Supplementary material')
-    pre_conflict = retrieve_text_before_simple_phrase(pre_supplementary, 'Conflict of interest')
-    pre_acknowledgement = retrieve_text_before_simple_phrase(pre_conflict, 'Acknowledgments')
+    pre_reference = retrieve_text_before_phrase(text, _reference_regex, 'References', 'references')
+    pre_supplementary = retrieve_text_before_phrase(pre_reference, _supp_regex, 'Supplementary material', 'supplementary material')
+    pre_conflict = retrieve_text_before_phrase(pre_supplementary, _conf_regex, 'Conflict of interest', 'conflict of interest')
+    pre_acknowledgement = retrieve_text_before_phrase(pre_conflict, _ackno_regex, 'Acknowledgments', 'acknowledgments')
 
     return clean_string(pre_acknowledgement)
 
@@ -56,10 +70,8 @@ def clean_string(given_string) -> str:
     # Clean strings so that matches aren't missed based on punctuation, extra whitespace, or casing (but leaving hybrid characters.
 
     if given_string is not None:
-        to_strip = string.punctuation
-        for h in hybrid_characters:
-            to_strip = to_strip.replace(h, '')
-        words = [w.strip(to_strip).lower() for w in given_string.split()]
+
+        words = [w.strip(_punctuation_to_strip).lower() for w in given_string.split()]
         if '' in words:
             words.remove('')
         out = ' '.join(words)

@@ -9,6 +9,10 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 
+import sys
+
+sys.path.append('..')
+
 from CORE_searches import build_output_dict, core_project_path, filter_dict_pkl, clean_string, clean_paper_text, longest_ambiguous_homonym, \
     longest_potential_disambiguator
 
@@ -37,12 +41,16 @@ def find_ambiguous_uses(text: str) -> Tuple[List[str], List[str], dict]:
 
     # Look for ambiguous uses in body text
     clean_body_text = clean_paper_text(text)
+    # clean_time = time.time()
+    # time1 = round((clean_time - start_time), 2)
 
     clean_body_text_list = clean_body_text.split()
     potential_homonym_uses = get_lists_of_words(clean_body_text_list, longest_ambiguous_homonym)
 
     # Find potentially ambiguous words
     intersection = set(potential_homonym_uses).intersection(homonyms)
+    # intersect_time = time.time()
+    # time2 = round((intersect_time - clean_time), 2)
     if len(intersection) > 0:
         homonym_uses = list(intersection)
         ambiguous_uses = []
@@ -52,6 +60,8 @@ def find_ambiguous_uses(text: str) -> Tuple[List[str], List[str], dict]:
         clean_text_anywhere = clean_string(text)
         clean_text_anywhere_list = clean_text_anywhere.split()
         potential_disambiguators = set(get_lists_of_words(clean_text_anywhere_list, longest_potential_disambiguator))
+        # disambg_time = time.time()
+        # time3 = round((disambg_time - intersect_time), 2)
 
         for homonym in homonym_uses:
             disambiguators[homonym] = list(set(loaded_filter_dict[homonym]).intersection(potential_disambiguators))
@@ -65,10 +75,22 @@ def find_ambiguous_uses(text: str) -> Tuple[List[str], List[str], dict]:
             assert len(list(disambiguators.keys())) == 0
 
         # end_time = time.time()
-        # print(
-        #     f'Took {round((end_time - start_time), 4)} seconds to gather text.')
+        # total_time = end_time - start_time
+        # if total_time > 1:
+        #     print(f'Took {time1} to clean text of length: {len(text)}.')
+        #     print(f'Took {time2} to check intersection with lengths : {len(potential_homonym_uses)}:{len(homonyms)}.')
+        #     print(f'Took {time3} to clean strings and get potential disambiguators with text length : {len(text)}.')
+        #     print(
+        #         f'Took {round((end_time - disambg_time), 2)}  to search through homonyms with {len(potential_disambiguators)} potential disambiguators.')
+        #     print(f'Total time: {total_time}')
         return homonym_uses, ambiguous_uses, disambiguators
     else:
+        # end_time = time.time()
+        # total_time = end_time - start_time
+        # if total_time > 1:
+        #     print(f'Took {time1} to clean text of length: {len(text)}.')
+        #     print(f'Took {time2} to check intersection with lengths : {len(potential_homonym_uses)}:{len(homonyms)}.')
+        #     print(f'Total time: {total_time}')
         return [], [], {}
 
 
@@ -126,7 +148,6 @@ def process_tar_paper_member_lines(lines):
             info_df = pd.DataFrame(
                 build_output_dict(corpusid, doi, year, title, authors,
                                   url, language, journals, issn, homonym_uses, ambiguous_uses, disambiguators))
-
             return info_df
 
 
@@ -149,12 +170,12 @@ def get_relevant_papers_from_download():
                 start_time = time.time()
 
                 with tarfile.open(fileobj=provider_file_obj, mode='r') as sub_archive:
-                    members = sub_archive.getmembers()  # Get members will get all files recursively, though deeper archives will need extracting too.
+                    # members = sub_archive.getmembers()  # Get members will get all files recursively, though deeper archives will need extracting too.
 
                     tasks = []
                     provider_outputs = []
                     with multiprocessing.Pool(128) as pool:
-                        for paper_member in members:
+                        for paper_member in sub_archive:
                             if paper_member.name.endswith('.json'):
                                 # Cannot serialize these objects, so get lines out before adding to process
                                 f = sub_archive.extractfile(paper_member)
@@ -169,17 +190,17 @@ def get_relevant_papers_from_download():
                             if paper_df is not None:
                                 provider_outputs.append(paper_df)
 
-                    if len(provider_outputs) > 0:
-                        provider_df = pd.concat(provider_outputs)
-                    else:
-                        provider_df = pd.DataFrame()
-                        provider_df['corpusid'] = np.nan
+                if len(provider_outputs) > 0:
+                    provider_df = pd.concat(provider_outputs)
+                else:
+                    provider_df = pd.DataFrame()
+                    provider_df['corpusid'] = np.nan
 
-                    provider_df['tar_archive_name'] = tar_archive_name
-                    provider_df.set_index(['corpusid'], drop=True).to_csv(provider_csv)
-                    end_time = time.time()
-                    print(
-                        f'{len(provider_df)} papers collected from provider: {tar_archive_name}. Took {round((end_time - start_time) / 60, 2)} mins.')
+                provider_df['tar_archive_name'] = tar_archive_name
+                provider_df.set_index(['corpusid'], drop=True).to_csv(provider_csv)
+                end_time = time.time()
+                print(
+                    f'{len(provider_df)} papers collected from provider: {tar_archive_name}. Took {round((end_time - start_time) / 60, 2)} mins.')
 
             else:
                 print(f'Already checked: {provider_csv}')
