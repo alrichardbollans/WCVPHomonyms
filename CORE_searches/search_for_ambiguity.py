@@ -29,10 +29,9 @@ for p in [core_paper_info_path]:
 
 def get_lists_of_words(words: List[str], largest_phrase: int) -> List[str]:
     out_list = words.copy()
-    to_check = range(largest_phrase + 1)[2:]
+    to_check = range(2, largest_phrase + 1)
     for i in to_check:
-        add_list = [" ".join([words[j + c] for c in range(i)]) for j in range(len(words) - i + 1)]
-        out_list += add_list
+        out_list +=  [" ".join([words[j + c] for c in range(i)]) for j in range(len(words) - i + 1)]
     return out_list
 
 
@@ -48,7 +47,7 @@ def find_ambiguous_uses(text: str) -> Tuple[List[str], List[str], dict]:
     potential_homonym_uses = get_lists_of_words(clean_body_text_list, longest_ambiguous_homonym)
 
     # Find potentially ambiguous words
-    intersection = set(potential_homonym_uses).intersection(homonyms)
+    intersection = set(potential_homonym_uses) & homonyms
     # intersect_time = time.time()
     # time2 = round((intersect_time - clean_time), 2)
     if len(intersection) > 0:
@@ -64,7 +63,8 @@ def find_ambiguous_uses(text: str) -> Tuple[List[str], List[str], dict]:
         # time3 = round((disambg_time - intersect_time), 2)
 
         for homonym in homonym_uses:
-            disambiguators[homonym] = list(set(loaded_filter_dict[homonym]).intersection(potential_disambiguators))
+
+            disambiguators[homonym] = list(loaded_filter_dict[homonym] & potential_disambiguators)
             if len(disambiguators[homonym]) == 0:
                 ambiguous_uses.append(homonym)
                 del disambiguators[homonym]
@@ -210,4 +210,6 @@ if __name__ == '__main__':
     with open(filter_dict_pkl, 'rb') as f:
         loaded_filter_dict = pickle.load(f)
         homonyms = set(loaded_filter_dict.keys())
+        for homonym in homonyms:
+            loaded_filter_dict[homonym] = set(loaded_filter_dict[homonym])
         get_relevant_papers_from_download()
