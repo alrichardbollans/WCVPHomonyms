@@ -6,3 +6,10 @@ Retrieved 12/12/2023
 automatchnames v1.3
 Python packages for downloading the World Checklist of Vascular Plants (WCVP) and matching names to it
 https://github.com/alrichardbollans/automatchnames
+
+Petr Knoth et al., ‘CORE: A Global Aggregation Service for Open Access Papers’,
+Scientific Data 10, no. 1 (7 June 2023): 366, https://doi.org/10.1038/s41597-023-02208-w.
+Version: 2022_03_11
+
+The authors acknowledge the Research/Scientific Computing teams at The James Hutton Institute and NIAB for providing computational resources and technical support for the
+“UK’s Crop Diversity Bioinformatics HPC” (BBSRC grant BB/S019669/1), use of which has contributed to the results reported within this paper.
