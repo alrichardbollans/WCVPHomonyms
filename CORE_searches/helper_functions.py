@@ -70,8 +70,8 @@ def clean_string(given_string) -> str:
     # Clean strings so that matches aren't missed based on punctuation, extra whitespace, or casing (but leaving hybrid characters.
 
     if given_string is not None:
-
-        words = [w.strip(_punctuation_to_strip).lower() for w in given_string.split()]
+        given_string_lower = given_string.lower()
+        words = [w.strip(_punctuation_to_strip) for w in given_string_lower.split()]
         if '' in words:
             words.remove('')
         out = ' '.join(words)
