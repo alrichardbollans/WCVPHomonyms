@@ -39,7 +39,7 @@ somewhat unsurprising due to the connectivity given by the internet, as well as 
 
 The chart below shows the global distributions of the accepted species that are resolved to by ambiguous binomial homonyms. This may partly reflect
 the global distribution of plant species (e.g. dense population in South America ---
-see [WCVP species plot](https://github.com/alrichardbollans/automatchnames/tree/main/wcvp_download/unit_tests/test_outputs/all_species_native_distribution.jpg)),
+see [WCVP species plot](https://github.com/alrichardbollans/wcvpy/blob/main/wcvpy/wcvp_download/unit_tests/test_outputs/all_species_native_distribution.jpg)),
 but parts of Europe are possibly over-represented.
 
 ![ambiguous_homonyms_dists.jpg](taxonomy_inputs%2Foutputs%2Fplots%2Fambiguous_homonyms_dists.jpg)
