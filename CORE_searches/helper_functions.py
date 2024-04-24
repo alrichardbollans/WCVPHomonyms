@@ -6,7 +6,7 @@ from typing import List
 
 import pandas as pd
 from tqdm import tqdm
-from wcvp_download import infraspecific_chars, hybrid_characters, wcvp_columns
+from wcvpy.wcvp_download import infraspecific_chars, hybrid_characters, wcvp_columns
 
 from taxonomy_inputs import taxonomy_inputs_output_path, project_path
 

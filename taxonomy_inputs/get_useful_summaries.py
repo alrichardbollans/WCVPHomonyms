@@ -1,8 +1,7 @@
 import os
 
 import pandas as pd
-from pkg_resources import resource_filename
-from wcvp_download import wcvp_columns, wcvp_accepted_columns
+from wcvpy.wcvp_download import wcvp_columns, wcvp_accepted_columns
 
 from taxonomy_inputs import taxonomy_inputs_output_path
 

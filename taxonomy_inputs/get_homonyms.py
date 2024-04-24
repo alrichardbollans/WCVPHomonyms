@@ -2,10 +2,10 @@ import os
 
 import numpy as np
 import pandas as pd
-from wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names
+from wcvpy.wcvp_download import get_all_taxa, wcvp_columns, wcvp_accepted_columns, clean_whitespaces_in_names
 from datetime import datetime
 
-scratch_path = os.environ.get('SCRATCH')
+scratch_path = os.environ.get('KEWSCRATCHPATH')
 project_path = os.path.join(scratch_path, 'WCVPHomonyms')
 taxonomy_inputs_output_path = os.path.join(project_path, 'taxonomy_inputs', 'outputs')
 

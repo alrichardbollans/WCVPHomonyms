@@ -3,7 +3,7 @@ on the Internet
 http://wcvp.science.kew.org/
 Retrieved 12/12/2023
 
-automatchnames v1.3
+wcvpy v1.3.2
 Python packages for downloading the World Checklist of Vascular Plants (WCVP) and matching names to it
 https://github.com/alrichardbollans/automatchnames
 

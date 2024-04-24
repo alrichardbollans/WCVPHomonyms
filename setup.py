@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        "automatchnames >= 1.3",
+        "wcvpy >= 1.3",
     ],
     # *strongly* suggested for sharing
     version='1.0',

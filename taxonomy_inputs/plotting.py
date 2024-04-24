@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from wcvp_download import wcvp_columns, plot_native_number_accepted_taxa_in_regions, wcvp_accepted_columns
+from wcvpy.wcvp_download import wcvp_columns, plot_native_number_accepted_taxa_in_regions, wcvp_accepted_columns
 
 from taxonomy_inputs import taxonomy_inputs_output_path
 
