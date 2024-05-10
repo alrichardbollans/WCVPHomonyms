@@ -5,7 +5,7 @@ Retrieved 12/12/2023
 
 wcvpy v1.3.2
 Python packages for downloading the World Checklist of Vascular Plants (WCVP) and matching names to it
-https://github.com/alrichardbollans/automatchnames
+https://github.com/alrichardbollans/wcvpy
 
 Petr Knoth et al., ‘CORE: A Global Aggregation Service for Open Access Papers’,
 Scientific Data 10, no. 1 (7 June 2023): 366, https://doi.org/10.1038/s41597-023-02208-w.
