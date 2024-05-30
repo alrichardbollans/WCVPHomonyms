@@ -4,7 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from wcvpy.wcvp_download import wcvp_columns, plot_native_number_accepted_taxa_in_regions, wcvp_accepted_columns
 
-from taxonomy_inputs import taxonomy_inputs_output_path
+from taxonomy_inputs import taxonomy_inputs_output_path, WCVP_VERSION
 
 
 def generic_category_plot(var: str, title: str, figsize=(40, 10), sort_var=False):
@@ -134,7 +134,7 @@ def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col
 def plot_distributions():
 
     plot_native_number_accepted_taxa_in_regions(ambiguous_homonyms, wcvp_accepted_columns['species'], os.path.join('outputs', 'plots'),
-                                                'ambiguous_homonyms_dists.jpg', include_extinct=True)
+                                                'ambiguous_homonyms_dists.jpg', include_extinct=True, wcvp_version=WCVP_VERSION)
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ project_path = os.path.join(scratch_path, 'WCVPHomonyms')
 taxonomy_inputs_output_path = os.path.join(project_path, 'taxonomy_inputs', 'outputs')
 
 RANKS_TO_CONSIDER = ['Species']
-
+WCVP_VERSION = None
 
 def summarise_homonym_df(df: pd.DataFrame, outpath: str):
     duplicates = df.drop(
@@ -119,7 +119,7 @@ def main():
 
 
 if __name__ == '__main__':
-    wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER)
+    wcvp_given_data = get_all_taxa(ranks=RANKS_TO_CONSIDER, version=WCVP_VERSION)
     wcvp_given_data = wcvp_given_data[
         ~wcvp_given_data[wcvp_columns['status']].isin(['Artificial Hybrid', 'Unplaced', 'Invalid', 'Misapplied', 'Orthographic'])]
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
