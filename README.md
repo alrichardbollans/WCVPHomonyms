@@ -73,6 +73,23 @@ letters to lower case and single-spacing all whitespace.
 
 Results to follow...
 
+## Discussion
+
+This work highlights one specific aspect of ambiguity with regards to plant nomenclature. Though the underlying cause of this ambiguity is improving
+over time, the ambiguity is persistent and requires disambiguation by people reading scientific papers, datasets, herbarium sheets, blog posts etc..
+Increasingly this disambiguation, or _name resolution_, also needs to be carried out by automated systems that are attempting to extract structured
+data from these types of sources. There are a plethora of software packages for this job (see [3]
+and [here](https://github.com/alrichardbollans/wcvpy/blob/main/other_methods.md) for some examples), however when faced with ambiguous homonyms,
+automated systems must make choices on which name to resolve to. A human resolver may overcome this ambiguity by searching the context surrounding a
+given name, e.g. what does a paper reference? when was it published? does the paper mention a particular taxonomic authority or dataset version?
+This kind of context is not available to standard resolution methods. In either case, the most reliable way to overcome this ambiguity is to
+_include taxonomic authorities in plant names_.
+
+While the use of taxonomic authorities is standard practice in published work related to taxonomy and nomenclature, this appears to be much less
+common for other kinds of research and, as far as I understand, is actually discouraged by some journals. Personally, I would strongly encourage the
+use of full scientific names (i.e. including taxonomic authority) anywhere that 'scientific' names are used so that the related documents contain
+persistent, unambiguous references.
+
 ## References
 
 [1] Rafaël Govaerts et al., ‘The World Checklist of Vascular Plants, a Continuously Updated Resource for Exploring Global Plant Diversity’, Scientific
@@ -80,6 +97,9 @@ Data 8, no. 1 (2021): 1–10, https://doi.org/10.1038/s41597-021-00997-6.
 
 [2] Petr Knoth et al., ‘CORE: A Global Aggregation Service for Open Access Papers’, Scientific Data 10, no. 1 (7 June 2023):
 366, https://doi.org/10.1038/s41597-023-02208-w.
+
+[3] Matthias Grenié et al., ‘Harmonizing Taxon Names in Biodiversity Data: A Review of Tools, Databases and Best Practices’, Methods in Ecology and
+Evolution, 18 February 2022, 2041-210X.13802, https://doi.org/10.1111/2041-210X.13802.
 
 ## Licence
 
