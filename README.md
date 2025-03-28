@@ -4,7 +4,7 @@
 
 This analysis considers validly published binomial species names (excluding hybrids) in the World Checklist of Vascular Plants (WCVP) v13 [1] that
 resolve to an accepted name (i.e. Unplaced names are ignored). I consider duplicated binomial names as homonyms, and specifically explore ambiguous
-homonyms (i.e. those that resolve to different accepted species).
+homonyms (i.e. those that resolve to different accepted species). For example, _Abies grandis_ [is a homonym](https://powo.science.kew.org/results?q=Abies%20grandis), as it may refer to _Abies grandis_ (Douglas ex D.Don) Lindl. or _Abies grandis_ Hook. In this case, when the taxonomic authority is not specified, this is also ambiguous in the sense that these two records may refer to different accepted species -- _Abies grandis_ (Douglas ex D.Don) or _Abies amabilis_ Douglas ex J.Forbes.
 
 ## Overview
 
