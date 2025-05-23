@@ -131,11 +131,6 @@ def plot_taxon_statuses(df: pd.DataFrame, outpath: str, file_tag: str, class_col
     plt.close()
 
 
-def plot_distributions():
-
-    plot_native_number_accepted_taxa_in_regions(ambiguous_homonyms, wcvp_accepted_columns['species'], os.path.join('outputs', 'plots'),
-                                                'ambiguous_homonyms_dists.jpg', include_extinct=True, wcvp_version=WCVP_VERSION)
-
 
 if __name__ == '__main__':
     given_wcvp_data = pd.read_csv(os.path.join(taxonomy_inputs_output_path, 'wcvp_data.csv'), index_col=0, dtype={'publication_year': 'Int64'})
@@ -145,4 +140,3 @@ if __name__ == '__main__':
     year_plots()
     family_plots()
     plot_taxon_statuses(ambiguous_homonyms, os.path.join('outputs', 'plots'), 'ambiguous_homonyms_taxon_status')
-    plot_distributions()

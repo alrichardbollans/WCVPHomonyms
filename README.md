@@ -4,7 +4,10 @@
 
 This analysis considers validly published binomial species names (excluding hybrids) in the World Checklist of Vascular Plants (WCVP) v13 [1] that
 resolve to an accepted name (i.e. Unplaced names are ignored). I consider duplicated binomial names as homonyms, and specifically explore ambiguous
-homonyms (i.e. those that resolve to different accepted species). For example, _Abies grandis_ [is a homonym](https://powo.science.kew.org/results?q=Abies%20grandis), as it may refer to _Abies grandis_ (Douglas ex D.Don) Lindl. or _Abies grandis_ Hook. In this case, when the taxonomic authority is not specified, this is also ambiguous in the sense that these two records may refer to different accepted species -- _Abies grandis_ (Douglas ex D.Don) or _Abies amabilis_ Douglas ex J.Forbes.
+homonyms (i.e. those that resolve to different accepted species). For example, _Abies
+grandis_ [is a homonym](https://powo.science.kew.org/results?q=Abies%20grandis), as it may refer to _Abies grandis_ (Douglas ex D.Don) Lindl. or
+_Abies grandis_ Hook. In this case, when the taxonomic authority is not specified, this is also ambiguous in the sense that these two records may
+refer to different accepted species -- _Abies grandis_ (Douglas ex D.Don) or _Abies amabilis_ Douglas ex J.Forbes.
 
 ## Overview
 
@@ -27,7 +30,7 @@ the binomial name that can refer to the most different accepted species, possibl
 - *Artemisia splendens* Willd.
 - *Artemisia umbelliformis* Lam.
 
-## Where and When do Ambiguous Homonyms Come From?
+## When and Where do Ambiguous Homonyms Come From?
 
 The graph below shows published names over time and the proportions of which are homonyms (note that a name may have not been homonymous at
 publication but falls into homonymy due to a later publication). It is clear to see that over time, fewer homonyms are being published! This is
@@ -35,52 +38,100 @@ somewhat unsurprising due to the connectivity given by the internet, as well as 
 
 ![WCVP Species Publications and Homonym Occurrence_normalized.jpg](taxonomy_inputs%2Foutputs%2Fplots%2FWCVP%20Species%20Publications%20and%20Homonym%20Occurrence_normalized.jpg)
 
-The chart below shows the global distributions of the accepted species that are resolved to by ambiguous binomial homonyms. This may partly reflect
-the global distribution of plant species (e.g. dense population in South America ---
-see [WCVP species plot](https://github.com/alrichardbollans/wcvpy/blob/main/wcvpy/wcvp_download/unit_tests/test_outputs/all_species_native_distribution.jpg)),
-but parts of Europe are possibly over-represented.
+The chart below shows the global distributions of the accepted species that are resolved to by ambiguous binomial homonyms.
 
-![ambiguous_homonyms_dists.jpg](taxonomy_inputs%2Foutputs%2Fplots%2Fambiguous_homonyms_dists.jpg)
+![ambiguous_homonyms_dists.jpg](bias_analysis/outputs/ambiguous_homonyms_dists.jpg)
 
-## Usage of Homonyms in Literature
+This partly reflects the global distribution of plant species (e.g. dense population in South America ---
+see [WCVP species plot](bias_analysis/outputs/underlying_species_distributions.jpg)).
 
-**_Note_**: The following suggests a process for analysing ambiguity of homonyms in open access literature, though searching through ~33 million
-papers using regex or other string matching will require a computational/energy expense that I'm not yet convinced is worth it.
+To assess which regions may be overrepresented, we fit a LOWESS regression model, which is robust to outliers, on the number of accepted species in a
+region against the number of accepted species that are resolved to by ambiguous binomial homonyms:
 
-The ambiguous homonyms discussed can be disambiguated by using the correct authority, e.g. *Artemisia rupestris* Scop. only refers to
-*Artemisia alba subsp. alba*, and so the presence of homonyms on their own is not necessarily an issue. However, these binomial names are not
-always disambiguated in this way and can result in ambiguity in scientific literature.
+![outliers.jpg](bias_analysis/outputs/regressions/outliers.jpg)
 
-As seen above, the *naming* of plant species is improving over time with regards to homonymy. However, I wonder how ambiguous homonyms are treated in
-scientific literature and would like to quantify the number of ambiguous uses in scientific articles from CORE [2].
+Outliers are highlighted where the residuals are greater than 2 standard deviations from the mean. To visualise the global distribution of these
+residuals:
 
-To do this, I search the 32.8 million full text papers hosted by CORE (v.2022) from 10,744 providers. For a given text, I begin by applying some
-simple cleaning which aims to extract the body text from the full text (i.e. the text given before 'References', 'Supplementary material', 'Conflict
-of interest' and 'Acknowledgments' headings) and then cleans the text by removing any punctuation (except hybrid characters "×" and "+"), setting all
-letters to lower case and single-spacing all whitespace. With this body text, I then search for mentions of any ambiguous species binomials (as
-defined above).
+![residuals_distributions.jpg](bias_analysis/outputs/regressions/residuals_distributions.jpg)
 
-In papers containing these homonyms, I then search for any terms that potentially dismbiguate the homonym i.e.
+We mainly see a concentration in Central and Southern Europe. Further analysis is needed to understand why these regions are
+overrepresented.
 
-- taxon names with authors
-- taxon names with paranthet authors
-- taxon names with primary author
-- Each of the above with an abbreviated genus name.
+It is plausible that the greater ambiguity of names in these regions could affect statistical analyses when names need to be resolved, though this
+requires further investigation.
 
-I also check for the use of the homonym preceding infraspecific or hybrid characters which may indicate a disambiguation.
+[//]: # (## Usage of Homonyms in Literature)
 
-When searching for disambiguating terms, I clean the text as described above but without removing any sections. To align with the cleaned
-text, the disambiguating terms are also cleaned by removing any punctuation (except hybrid characters "×" and "+"), setting all
-letters to lower case and single-spacing all whitespace.
+[//]: # ()
 
-Results to follow...
+[//]: # (**_Note_**: The following suggests a process for analysing ambiguity of homonyms in open access literature, though searching through ~33 million)
+
+[//]: # (papers using regex or other string matching will require a computational/energy expense that I'm not yet convinced is worth it.)
+
+[//]: # ()
+
+[//]: # (The ambiguous homonyms discussed can be disambiguated by using the correct authority, e.g. *Artemisia rupestris* Scop. only refers to)
+
+[//]: # (*Artemisia alba subsp. alba*, and so the presence of homonyms on their own is not necessarily an issue. However, these binomial names are not)
+
+[//]: # (always disambiguated in this way and can result in ambiguity in scientific literature.)
+
+[//]: # ()
+
+[//]: # (As seen above, the *naming* of plant species is improving over time with regards to homonymy. However, I wonder how ambiguous homonyms are treated in)
+
+[//]: # (scientific literature and would like to quantify the number of ambiguous uses in scientific articles from CORE [2].)
+
+[//]: # ()
+
+[//]: # (To do this, I search the 32.8 million full text papers hosted by CORE &#40;v.2022&#41; from 10,744 providers. For a given text, I begin by applying some)
+
+[//]: # (simple cleaning which aims to extract the body text from the full text &#40;i.e. the text given before 'References', 'Supplementary material', 'Conflict)
+
+[//]: # (of interest' and 'Acknowledgments' headings&#41; and then cleans the text by removing any punctuation &#40;except hybrid characters "×" and "+"&#41;, setting all)
+
+[//]: # (letters to lower case and single-spacing all whitespace. With this body text, I then search for mentions of any ambiguous species binomials &#40;as)
+
+[//]: # (defined above&#41;.)
+
+[//]: # ()
+
+[//]: # (In papers containing these homonyms, I then search for any terms that potentially dismbiguate the homonym i.e.)
+
+[//]: # ()
+
+[//]: # (- taxon names with authors)
+
+[//]: # (- taxon names with paranthet authors)
+
+[//]: # (- taxon names with primary author)
+
+[//]: # (- Each of the above with an abbreviated genus name.)
+
+[//]: # ()
+
+[//]: # (I also check for the use of the homonym preceding infraspecific or hybrid characters which may indicate a disambiguation.)
+
+[//]: # ()
+
+[//]: # (When searching for disambiguating terms, I clean the text as described above but without removing any sections. To align with the cleaned)
+
+[//]: # (text, the disambiguating terms are also cleaned by removing any punctuation &#40;except hybrid characters "×" and "+"&#41;, setting all)
+
+[//]: # (letters to lower case and single-spacing all whitespace.)
+
+[//]: # ()
+
+[//]: # (Results to follow...)
 
 ## Discussion
 
-This work highlights one specific aspect of ambiguity with regards to plant nomenclature. Though the underlying cause of this ambiguity is improving
+This analysis highlights one specific aspect of ambiguity with regards to plant nomenclature. Though the underlying cause of this ambiguity is
+improving
 over time, the ambiguity is persistent and requires disambiguation by people reading scientific papers, datasets, herbarium sheets, blog posts etc..
 Increasingly this disambiguation, or _name resolution_, also needs to be carried out by automated systems that are attempting to extract structured
-data from these types of sources. There are a plethora of software packages for this job (see [3]
+data from these types of sources. There are a plethora of software packages for this job (see [2]
 and [here](https://github.com/alrichardbollans/wcvpy/blob/main/other_methods.md) for some examples), however when faced with ambiguous homonyms,
 automated systems must make choices on which name to resolve to. A human resolver may overcome this ambiguity by searching the context surrounding a
 given name, e.g. what does a paper reference? when was it published? does the paper mention a particular taxonomic authority or dataset version?
@@ -97,10 +148,11 @@ persistent, unambiguous references.
 [1] Rafaël Govaerts et al., ‘The World Checklist of Vascular Plants, a Continuously Updated Resource for Exploring Global Plant Diversity’, Scientific
 Data 8, no. 1 (2021): 1–10, https://doi.org/10.1038/s41597-021-00997-6.
 
-[2] Petr Knoth et al., ‘CORE: A Global Aggregation Service for Open Access Papers’, Scientific Data 10, no. 1 (7 June 2023):
-366, https://doi.org/10.1038/s41597-023-02208-w.
+[//]: # ([2] Petr Knoth et al., ‘CORE: A Global Aggregation Service for Open Access Papers’, Scientific Data 10, no. 1 &#40;7 June 2023&#41;:)
 
-[3] Matthias Grenié et al., ‘Harmonizing Taxon Names in Biodiversity Data: A Review of Tools, Databases and Best Practices’, Methods in Ecology and
+[//]: # (366, https://doi.org/10.1038/s41597-023-02208-w.)
+
+[2] Matthias Grenié et al., ‘Harmonizing Taxon Names in Biodiversity Data: A Review of Tools, Databases and Best Practices’, Methods in Ecology and
 Evolution, 18 February 2022, 2041-210X.13802, https://doi.org/10.1111/2041-210X.13802.
 
 ## Licence
