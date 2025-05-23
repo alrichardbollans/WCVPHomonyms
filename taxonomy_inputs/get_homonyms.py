@@ -12,6 +12,7 @@ taxonomy_inputs_output_path = os.path.join(project_path, 'taxonomy_inputs', 'out
 RANKS_TO_CONSIDER = ['Species']
 WCVP_VERSION = None
 
+
 def summarise_homonym_df(df: pd.DataFrame, outpath: str):
     duplicates = df.drop(
         columns=['nomenclatural_remarks', 'geographic_area', 'lifeform_description', 'climate_description',
@@ -20,7 +21,6 @@ def summarise_homonym_df(df: pd.DataFrame, outpath: str):
                  'accepted_parent_rank'
                  ])
     duplicates = duplicates.sort_values(by=wcvp_columns['name'])
-    add_authors_to_names(duplicates)
 
     duplicates.to_csv(os.path.join(outpath, 'homonyms.csv'))
     duplicates.describe(include='all').to_csv(os.path.join(outpath, 'homonyms_summary.csv'))
@@ -37,7 +37,16 @@ def summarise_homonym_df(df: pd.DataFrame, outpath: str):
 
 
 def get_homonym_files():
-    # Gets all homonymns
+    """
+    Identifies and processes homonyms from the provided dataset, then stores the
+    results in a specified output file.
+
+    Homonyms are records that share the same name but might differ in other data
+    fields. This function filters the dataset for such records, processes them,
+    and writes a summary to an output file.
+
+    :return: None
+    """
     outpath = os.path.join(taxonomy_inputs_output_path, 'all_homonyms')
     homonyms = wcvp_given_data[wcvp_given_data[wcvp_columns['name']].duplicated(keep=False)]
 
@@ -55,31 +64,31 @@ def get_ambiguous_homonym_files():
     summarise_homonym_df(duplicates, outpath)
 
 
-def add_authors_to_given_col(df: pd.DataFrame, col, name_tag: str):
-    df[name_tag + '_with_authors'] = df[col].str.cat(
+def add_authors_to_given_col(df: pd.DataFrame, col):
+    df[col + '_with_authors'] = df[col].str.cat(
         df[wcvp_columns['authors']].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
 
     column_series = [df[c].fillna('') for c in
                      [wcvp_columns['paranthet_author'], wcvp_columns['primary_author']]]
-    df[name_tag + '_with_paranthet_authors'] = df[col].str.cat(column_series,
-                                                               sep=' ').apply(
+    df[col + '_with_paranthet_authors'] = df[col].str.cat(column_series,
+                                                          sep=' ').apply(
         clean_whitespaces_in_names)
 
-    df[name_tag + '_with_primary_author'] = df[col].str.cat(
+    df[col + '_with_primary_author'] = df[col].str.cat(
         df[wcvp_columns['primary_author']].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
 
 
 def add_authors_to_names(df: pd.DataFrame):
-    add_authors_to_given_col(df, wcvp_columns['name'], 'taxon_names')
+    add_authors_to_given_col(df, wcvp_columns['name'])
 
     df['abbreviated_genus'] = df[wcvp_columns['genus']].apply(lambda x: x[0] + '.')
     df['sp_binomial_with_abbreviated_genus'] = df['abbreviated_genus'].str.cat(
         df['species'].fillna(''),
         sep=' ').apply(clean_whitespaces_in_names)
 
-    add_authors_to_given_col(df, 'sp_binomial_with_abbreviated_genus', 'sp_binomial_with_abbreviated_genus')
+    add_authors_to_given_col(df, 'sp_binomial_with_abbreviated_genus')
 
 
 def parse_publication_year(given_string: str):
@@ -113,6 +122,28 @@ def test_year_parsing(given_str):
             return np.nan
 
 
+def assess_duplicates(df):
+    ## There shouldn't be any duplicated names inc. authors so just check here
+    duplicate_issues = df[df['taxon_name_with_authors'].duplicated(keep=False)]
+    if len(duplicate_issues) > 0:
+        if len(duplicate_issues) > 1524:
+            raise ValueError
+        else:
+            print(f'There are {len(duplicate_issues)} duplicate names with authors. These will be saved to file and removed.')
+            duplicate_issues.sort_values(by='taxon_name_with_authors').to_csv(
+                os.path.join(taxonomy_inputs_output_path, 'duplicate_names_with_authors.csv'))
+            multinames = duplicate_issues.groupby(['taxon_name_with_authors'])[wcvp_accepted_columns['name']].nunique(dropna=True).gt(
+                1)
+            # use loc to only see those values that have `True` in `accepted_name`:
+            duplicates_with_different_accepted_names = duplicate_issues.loc[
+                duplicate_issues['taxon_name_with_authors'].isin(multinames[multinames].index)]
+            if len(duplicates_with_different_accepted_names) > 0:
+                print(f'There are {len(duplicates_with_different_accepted_names)} duplicate names with authors which resolve to different names.')
+
+                duplicates_with_different_accepted_names.sort_values(by='taxon_name_with_authors').to_csv(
+                    os.path.join(taxonomy_inputs_output_path, 'duplicates_with_different_accepted_names.csv'))
+
+
 def main():
     get_homonym_files()
     get_ambiguous_homonym_files()
@@ -124,6 +155,10 @@ if __name__ == '__main__':
         ~wcvp_given_data[wcvp_columns['status']].isin(['Artificial Hybrid', 'Unplaced', 'Invalid', 'Misapplied', 'Orthographic'])]
     wcvp_given_data = wcvp_given_data[(wcvp_given_data[wcvp_columns['rank']].isin(RANKS_TO_CONSIDER))]  # restrict to just homonyms being species
     wcvp_given_data = wcvp_given_data.dropna(subset=[wcvp_accepted_columns['species']])
+    add_authors_to_names(wcvp_given_data)
+    assess_duplicates(wcvp_given_data)
+    wcvp_given_data = wcvp_given_data.drop_duplicates(subset=['taxon_name_with_authors'], keep='first')
+
     wcvp_given_data['publication_year'] = wcvp_given_data['first_published'].apply(parse_publication_year)
     wcvp_given_data[['plant_name_id', 'taxon_name', 'parenthetical_author', 'primary_author', 'taxon_rank',
                      'publication_author', 'first_published', 'publication_year', wcvp_accepted_columns['family'], wcvp_columns['status']]].to_csv(
